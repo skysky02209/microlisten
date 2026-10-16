@@ -40,6 +40,25 @@ video{width:100%;display:block;max-height:40vh;background:#000}
 .list *{overflow-anchor:none}
 .top{position:sticky;top:0;z-index:5;background:var(--bg);padding-bottom:6px}
 .list button.loop .tm:after{content:" 🔂"}
+.bigbtn{position:absolute;right:10px;bottom:10px;z-index:3;border:0;border-radius:12px;background:rgba(0,0,0,.6);color:#fff;font-weight:800;font-size:14px;padding:8px 12px;cursor:pointer}
+.player.audio .bigbtn{display:none}
+.bigbar{display:none}
+body.big{overflow:hidden}
+body.big .top{position:fixed;inset:0;z-index:50;background:#000;padding:0 0 calc(10px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+body.big .player{flex:1;min-height:0;border-radius:0}
+body.big video{max-height:none;height:100%;width:100%;object-fit:contain}
+body.big .bigbtn{display:none}
+body.big .now{color:#fff;margin:8px 14px 4px;font-size:15px}
+body.big .now span{color:#a5d6a7}
+body.big .prog{margin:0 14px;background:#333}
+body.big .time{color:#bbb;margin:4px 16px 6px}
+body.big .ctrl{margin:0 12px 8px}
+body.big .ctrl button{background:#1d1d1d;border-color:#333;color:#fff}
+body.big .ctrl .pp{background:var(--g)}
+body.big .bigbar{display:flex;gap:8px;margin:0 12px}
+.bigbar button{flex:1;border:1px solid #333;background:#1d1d1d;color:#fff;border-radius:12px;padding:10px 4px;font-weight:800;font-size:14px;cursor:pointer}
+.bigbar .x{flex:.7;background:#c62828;border-color:#c62828}
+video{width:100%;display:block;max-height:52vh;background:#000}
 .tip{font-size:12.5px;color:var(--sub);margin-top:14px;line-height:1.6}
 </style></head>
 <body><main>
@@ -47,6 +66,7 @@ video{width:100%;display:block;max-height:40vh;background:#000}
 <div class="top">
 <div class="player" id="pl">
   <video id="v" src="video.mp4?v=3" playsinline preload="metadata"></video>
+  <button class="bigbtn" id="bigOn">⛶ 크게 보기</button>
   <div class="ap">🎧 음성만 재생 중<small>화면을 꺼도 들을 수 있어요</small></div>
 </div>
 <div class="now" id="now">▶ 재생을 눌러 시작하세요</div>
@@ -59,6 +79,7 @@ video{width:100%;display:block;max-height:40vh;background:#000}
   <button id="fwd" aria-label="5초 앞으로">5↻</button>
   <button id="next" aria-label="다음 항목">⏭</button>
 </div>
+<div class="bigbar"><button id="bRate">⚡ 1x</button><button id="bLoop">🔁 전체</button><button class="x" id="bigOff">✕ 작게</button></div>
 </div>
 <div class="lbl">⚡ 속도</div>
 <div class="seg" id="sp"></div>
@@ -69,7 +90,7 @@ video{width:100%;display:block;max-height:40vh;background:#000}
 <div class="lbl">🖥 화면</div>
 <div class="seg" id="md"><button data-m="video" class="on">영상</button><button data-m="audio">음성만 (화면 꺼도 OK)</button></div>
 <div class="list" id="list"></div>
-<p class="tip">💡 목록에서 항목을 누르면 그 부분부터 재생돼요. "이 항목만"을 켜면 헷갈리는 항목만 계속 반복해요. 설정은 자동 저장돼요.</p>
+<p class="tip">💡 목록에서 항목을 누르면 그 부분부터 재생돼요. "이 항목만"을 켜면 헷갈리는 항목만 계속 반복해요. 영상을 누르거나 "⛶ 크게 보기"를 누르면 화면 가득 크게 보여요. 설정은 자동 저장돼요.</p>
 </main>
 <script>
 const CH=[{"t": 0, "e": 10.03, "tag": "시작", "title": "인트로"}, {"t": 10.03, "e": 19.03, "tag": "찐핵심 1", "title": "pv. 와 f. sp."}, {"t": 19.03, "e": 30.26, "tag": "찐핵심 2", "title": "난균류"}, {"t": 30.26, "e": 41.76, "tag": "찐핵심 3", "title": "세포벽"}, {"t": 41.76, "e": 52.8, "tag": "찐핵심 4", "title": "DNA 바코드"}, {"t": 52.8, "e": 65.83, "tag": "찐핵심 5", "title": "시퀀싱 3세대"}, {"t": 65.83, "e": 78.83, "tag": "찐핵심 6", "title": "품질 지표"}, {"t": 78.83, "e": 91.38, "tag": "찐핵심 7", "title": "FASTQ 와 GFF"}, {"t": 91.38, "e": 104.1, "tag": "찐핵심 8", "title": "E-value 와 상동성"}, {"t": 104.1, "e": 115.6, "tag": "찐핵심 9", "title": "Ortholog 와 Paralog"}, {"t": 115.6, "e": 124.1, "tag": "찐핵심 10", "title": "N50 과 L50"}, {"t": 124.1, "e": 133.1, "tag": "찐핵심 11", "title": "Gene Ontology"}, {"t": 133.1, "e": 141.1, "tag": "찐핵심 12", "title": "시작 신호"}, {"t": 141.1, "e": 154.25, "tag": "찐핵심 13", "title": "1차 DB 와 2차 DB"}, {"t": 154.25, "e": 166.25, "tag": "찐핵심 14", "title": "TPM 과 반복"}, {"t": 166.25, "e": 181.75, "tag": "찐핵심 15", "title": "FAIR 와 FDR"}, {"t": 181.75, "e": 198.75, "tag": "1주차", "title": "균주 와 분리주"}, {"t": 198.75, "e": 215.98, "tag": "1주차", "title": "진화 순서와 세포내공생"}, {"t": 215.98, "e": 233.98, "tag": "1주차", "title": "배양과 종 기준"}, {"t": 233.98, "e": 245.98, "tag": "2주차", "title": "디지털 전환 3단계"}, {"t": 245.98, "e": 265.54, "tag": "2주차", "title": "Phred 와 HGP"}, {"t": 265.54, "e": 280.04, "tag": "2주차", "title": "빅데이터"}, {"t": 280.04, "e": 292.54, "tag": "3주차", "title": "FASTA 와 Trimming"}, {"t": 292.54, "e": 307.66, "tag": "3주차", "title": "GFF 와 GenBank"}, {"t": 307.66, "e": 328.66, "tag": "3주차", "title": "메타데이터 표준"}, {"t": 328.66, "e": 345.22, "tag": "4주차", "title": "BLAST"}, {"t": 345.22, "e": 356.22, "tag": "4주차", "title": "조립 방식"}, {"t": 356.22, "e": 373.24, "tag": "4주차", "title": "변이"}, {"t": 373.24, "e": 385.74, "tag": "5주차", "title": "ORF"}, {"t": 385.74, "e": 396.74, "tag": "5주차", "title": "원핵 vs 진핵"}, {"t": 396.74, "e": 411.24, "tag": "5주차", "title": "예측 전략과 도구"}, {"t": 411.24, "e": 421.24, "tag": "6주차", "title": "Swiss-Prot 과 TrEMBL"}, {"t": 421.24, "e": 435.24, "tag": "6주차", "title": "병원체 DB"}, {"t": 435.24, "e": 447.89, "tag": "6주차", "title": "워크플로 도구"}, {"t": 447.89, "e": 461.98, "tag": "7주차", "title": "실험 설계"}, {"t": 461.98, "e": 474.48, "tag": "7주차", "title": "정규화"}, {"t": 474.48, "e": 491.98, "tag": "7주차", "title": "차등 발현"}, {"t": 491.98, "e": 502.98, "tag": "끝", "title": "마무리"}];
@@ -122,6 +143,18 @@ document.getElementById('pg').onclick=e=>{const r=e.currentTarget.getBoundingCli
 if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:'미생물 요약 카드 듣기',artist:'D-1'});
   navigator.mediaSession.setActionHandler('previoustrack',()=>document.getElementById('prev').click());
   navigator.mediaSession.setActionHandler('nexttrack',()=>document.getElementById('next').click());}
+
+// big screen
+const LN={off:'반복 끔',all:'🔁 전체',one:'🔂 이 항목'};
+function bigPaint(){document.getElementById('bRate').textContent='⚡ '+S.rate+'x';document.getElementById('bLoop').textContent=LN[S.loop];}
+function big(on){document.body.classList.toggle('big',on);if(on){try{history.pushState({big:1},'');}catch(e){}window.scrollTo(0,0);}bigPaint();}
+document.getElementById('bigOn').onclick=e=>{e.stopPropagation();big(true);};
+document.getElementById('bigOff').onclick=()=>{if(history.state&&history.state.big)history.back();else big(false);};
+window.addEventListener('popstate',()=>{if(document.body.classList.contains('big'))big(false);});
+v.addEventListener('click',()=>{if(!document.body.classList.contains('big'))big(true);else v.paused?v.play():v.pause();});
+document.getElementById('bRate').onclick=()=>{const i=RATES.indexOf(S.rate);setRate(RATES[(i+1)%RATES.length]);bigPaint();};
+document.getElementById('bLoop').onclick=()=>{const o=['off','all','one'];setLoop(o[(o.indexOf(S.loop)+1)%3]);bigPaint();};
+sp.addEventListener('click',bigPaint);lp.addEventListener('click',bigPaint);
 setRate(S.rate); setLoop(S.loop==='one'?'all':S.loop); if(S.mode==='audio')setMode('audio'); paint();
 </script>
 </body></html>
