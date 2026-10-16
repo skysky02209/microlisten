@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e7d32">
+<title>미생물 핵심 듣기</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<style>
+:root{--g:#2e7d32;--gl:#e8f5e9;--bg:#f6f8f6;--card:#fff;--ink:#1d2a1f;--sub:#5f6f62;--line:#e3e9e4;--red:#c62828}
+@media (prefers-color-scheme: dark){:root{--g:#66bb6a;--gl:#1d3320;--bg:#111613;--card:#1a211c;--ink:#e6efe7;--sub:#9aab9d;--line:#2a352c;--red:#ef6b6b}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif}
+main{max-width:560px;margin:0 auto;padding:12px 16px 40px}
+h1{font-size:19px;margin:6px 0 10px}
+.player{background:#000;border-radius:18px;overflow:hidden;position:relative}
+video{width:100%;display:block;max-height:58vh;background:#000}
+.player.audio video{display:none}
+.player.audio .ap{display:flex}
+.ap{display:none;height:150px;align-items:center;justify-content:center;flex-direction:column;color:#fff;background:linear-gradient(135deg,#2e7d32,#5e35b1);font-weight:800;gap:6px}
+.ap small{opacity:.85;font-weight:600}
+.now{margin:12px 2px 6px;font-weight:800;font-size:16px}
+.now span{color:var(--g)}
+.prog{height:8px;background:var(--line);border-radius:99px;overflow:hidden;cursor:pointer}
+.prog i{display:block;height:100%;background:var(--g);width:0}
+.time{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub);margin:4px 2px 10px}
+.ctrl{display:flex;gap:8px;justify-content:center;margin:6px 0 14px}
+.ctrl button{border:0;background:var(--card);border:1px solid var(--line);border-radius:14px;font-size:20px;padding:10px 0;flex:1;cursor:pointer;color:var(--ink)}
+.ctrl .pp{background:var(--g);color:#fff;flex:1.4;font-size:22px;border:0}
+.lbl{font-size:13px;color:var(--sub);font-weight:700;margin:12px 2px 6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:9px 4px;font-weight:700;font-size:14px;cursor:pointer;color:var(--ink)}
+.seg button.on{background:var(--g);border-color:var(--g);color:#fff}
+.list{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.list button{display:flex;width:100%;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--line);background:transparent;padding:11px 14px;text-align:left;font-size:14.5px;cursor:pointer;color:var(--ink)}
+.list button:last-child{border:0}
+.list button .tg{font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:var(--gl);color:var(--g);flex:none;min-width:52px;text-align:center}
+.list button .tm{margin-left:auto;color:var(--sub);font-size:12px}
+.list button.cur{background:var(--gl);font-weight:800}
+.list button.loop .tm:after{content:" 🔂"}
+.tip{font-size:12.5px;color:var(--sub);margin-top:14px;line-height:1.6}
+</style></head>
+<body><main>
+<h1>🎧 미생물 핵심 달달 듣기</h1>
+<div class="player" id="pl">
+  <video id="v" src="video.mp4" playsinline preload="metadata"></video>
+  <div class="ap">🎧 음성만 재생 중<small>화면을 꺼도 들을 수 있어요</small></div>
+</div>
+<div class="now" id="now">▶ 재생을 눌러 시작하세요</div>
+<div class="prog" id="pg"><i id="pgi"></i></div>
+<div class="time"><span id="tc">0:00</span><span id="td">8:09</span></div>
+<div class="ctrl">
+  <button id="prev" aria-label="이전 항목">⏮</button>
+  <button id="back" aria-label="5초 뒤로">↺5</button>
+  <button id="pp" class="pp" aria-label="재생">▶</button>
+  <button id="fwd" aria-label="5초 앞으로">5↻</button>
+  <button id="next" aria-label="다음 항목">⏭</button>
+</div>
+<div class="lbl">⚡ 속도</div>
+<div class="seg" id="sp"></div>
+<div class="lbl">🔁 반복</div>
+<div class="seg" id="lp">
+  <button data-l="off">반복 끄기</button><button data-l="all">전체 반복</button><button data-l="one">이 항목만 🔂</button>
+</div>
+<div class="lbl">🖥 화면</div>
+<div class="seg" id="md"><button data-m="video" class="on">영상</button><button data-m="audio">음성만 (화면 꺼도 OK)</button></div>
+<div class="list" id="list"></div>
+<p class="tip">💡 목록에서 항목을 누르면 그 부분부터 재생돼요. "이 항목만"을 켜면 헷갈리는 항목만 계속 반복해요. 설정은 자동 저장돼요.</p>
+</main>
+<script>
+const CH=[{"t": 0, "e": 9.73, "tag": "시작", "title": "인트로"}, {"t": 9.73, "e": 24.23, "tag": "핵심 1", "title": "pv. 와 f. sp. "}, {"t": 24.23, "e": 35.9, "tag": "핵심 2", "title": "난균류의 정체"}, {"t": 35.9, "e": 51.9, "tag": "핵심 3", "title": "세포벽 성분"}, {"t": 51.9, "e": 65.4, "tag": "핵심 4", "title": "세포내공생설의 근거"}, {"t": 65.4, "e": 79.14, "tag": "핵심 5", "title": "세균과 곰팡이의 DNA 바코드"}, {"t": 79.14, "e": 91.64, "tag": "핵심 6", "title": "미생물에 맞는 종 개념"}, {"t": 91.64, "e": 107.66, "tag": "핵심 7", "title": "시퀀싱 1·2·3세대"}, {"t": 107.66, "e": 121.66, "tag": "핵심 8", "title": "Phred 공식과 Q30"}, {"t": 121.66, "e": 134.72, "tag": "핵심 9", "title": "Depth와 Coverage"}, {"t": 134.72, "e": 152.87, "tag": "핵심 10", "title": "FAIR 원칙 4가지"}, {"t": 152.87, "e": 168.87, "tag": "핵심 11", "title": "FASTA와 FASTQ"}, {"t": 168.87, "e": 184.87, "tag": "핵심 12", "title": "GFF와 GenBank"}, {"t": 184.87, "e": 203.05, "tag": "핵심 13", "title": "메타데이터와 국제 표준"}, {"t": 203.05, "e": 219.05, "tag": "핵심 14", "title": "E-value와 상동성"}, {"t": 219.05, "e": 233.55, "tag": "핵심 15", "title": "Ortholog와 Paralog"}, {"t": 233.55, "e": 248.05, "tag": "핵심 16", "title": "N50과 L50"}, {"t": 248.05, "e": 265.29, "tag": "핵심 17", "title": "ORF와 원핵 특징"}, {"t": 265.29, "e": 279.34, "tag": "핵심 18", "title": "Gene Ontology 3요소"}, {"t": 279.34, "e": 294.84, "tag": "핵심 19", "title": "1차 DB와 2차 DB"}, {"t": 294.84, "e": 314.41, "tag": "핵심 20", "title": "RNA-seq 핵심 3가지"}, {"t": 314.41, "e": 325.91, "tag": "날먹 1", "title": "작을수록 좋은 것"}, {"t": 325.91, "e": 336.98, "tag": "날먹 2", "title": "클수록 좋은 것"}, {"t": 336.98, "e": 349.48, "tag": "날먹 3", "title": "더 중요한 반복"}, {"t": 349.48, "e": 359.71, "tag": "날먹 4", "title": "Swiss-Prot과 TrEMBL"}, {"t": 359.71, "e": 370.42, "tag": "날먹 5", "title": "Docker와 Singularity"}, {"t": 370.42, "e": 387.59, "tag": "날먹 6", "title": "보기에 있으면 무조건 틀린 문장"}, {"t": 387.59, "e": 401.09, "tag": "숫자 1", "title": "97% / 70% "}, {"t": 401.09, "e": 417.09, "tag": "숫자 2", "title": "1e-5 / SNP 1% / InDel "}, {"t": 417.09, "e": 433.59, "tag": "숫자 3", "title": "Ti/Tv · Reading frame · 100aa "}, {"t": 433.59, "e": 448.17, "tag": "숫자 4", "title": "GFF / GenBank / MIxS / MINSEQE 숫자"}, {"t": 448.17, "e": 468.27, "tag": "숫자 5", "title": "HGP · Illumina · GenBank 숫자"}, {"t": 468.27, "e": 478.89, "tag": "숫자 6", "title": "Swiss-Prot / TrEMBL 규모"}, {"t": 478.89, "e": 489.1, "tag": "끝", "title": "마무리"}];
+const v=document.getElementById('v'), pl=document.getElementById('pl');
+let S={rate:1,loop:'all',mode:'video'}; try{Object.assign(S,JSON.parse(localStorage.getItem('ml_set')||'{}'));}catch(e){}
+const save=()=>{try{localStorage.setItem('ml_set',JSON.stringify(S));}catch(e){}};
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const cur=()=>{const t=v.currentTime;let i=0;for(let k=0;k<CH.length;k++){if(t>=CH[k].t-0.05)i=k;}return i;};
+let lockIdx=null;
+// speed
+const RATES=[0.75,1,1.25,1.5,1.75,2];
+const sp=document.getElementById('sp');
+sp.innerHTML=RATES.map(r=>'<button data-r="'+r+'">'+r+'x</button>').join('');
+function setRate(r){S.rate=r;v.playbackRate=r;v.defaultPlaybackRate=r;sp.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.r===r));save();}
+sp.onclick=e=>{const b=e.target.closest('button');if(b)setRate(+b.dataset.r);};
+// loop
+const lp=document.getElementById('lp');
+function setLoop(l){S.loop=l;lockIdx=l==='one'?cur():null;lp.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));paint();save();}
+lp.onclick=e=>{const b=e.target.closest('button');if(b)setLoop(b.dataset.l);};
+// mode
+const md=document.getElementById('md');
+function setMode(m,keep){const t=v.currentTime,playing=!v.paused;S.mode=m;pl.classList.toggle('audio',m==='audio');md.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  const src=m==='audio'?'audio.m4a':'video.mp4'; if(!v.src.endsWith(src)){v.src=src;v.addEventListener('loadedmetadata',function f(){v.currentTime=t;v.playbackRate=S.rate;if(playing)v.play();v.removeEventListener('loadedmetadata',f);});}
+  save();}
+md.onclick=e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.m);};
+// list
+const list=document.getElementById('list');
+list.innerHTML=CH.map((c,i)=>'<button data-i="'+i+'"><span class="tg">'+c.tag+'</span><span>'+c.title+'</span><span class="tm">'+fmt(c.t)+'</span></button>').join('');
+list.onclick=e=>{const b=e.target.closest('button');if(!b)return;go(+b.dataset.i);};
+function go(i){i=Math.max(0,Math.min(CH.length-1,i));v.currentTime=CH[i].t+0.01;if(S.loop==='one')lockIdx=i;v.play();paint();}
+let last=-1;
+function paint(){const i=cur();const c=CH[i];document.getElementById('now').innerHTML='<span>'+c.tag+'</span> · '+c.title+(S.loop==='one'?' 🔂':'');
+  if(i!==last||true){list.querySelectorAll('button').forEach((b,k)=>{b.classList.toggle('cur',k===i);b.classList.toggle('loop',S.loop==='one'&&k===lockIdx);});
+   if(i!==last){const el=list.children[i];if(el&&!v.paused)el.scrollIntoView({block:'nearest',behavior:'smooth'});last=i;}}
+  document.getElementById('tc').textContent=fmt(v.currentTime);
+  if(v.duration)document.getElementById('pgi').style.width=(v.currentTime/v.duration*100)+'%';}
+v.addEventListener('loadedmetadata',()=>{document.getElementById('td').textContent=fmt(v.duration);v.playbackRate=S.rate;});
+v.addEventListener('timeupdate',()=>{
+  if(S.loop==='one'&&lockIdx!=null){const c=CH[lockIdx];if(v.currentTime>=c.e-0.15||v.currentTime<c.t-0.5){v.currentTime=c.t+0.01;}}
+  paint();});
+v.addEventListener('ended',()=>{if(S.loop==='all'){v.currentTime=0;v.play();}else if(S.loop==='one'&&lockIdx!=null){v.currentTime=CH[lockIdx].t;v.play();}});
+v.addEventListener('play',()=>{document.getElementById('pp').textContent='⏸';v.playbackRate=S.rate;});
+v.addEventListener('pause',()=>{document.getElementById('pp').textContent='▶';});
+document.getElementById('pp').onclick=()=>v.paused?v.play():v.pause();
+document.getElementById('back').onclick=()=>{v.currentTime=Math.max(0,v.currentTime-5);};
+document.getElementById('fwd').onclick=()=>{v.currentTime=Math.min(v.duration||0,v.currentTime+5);};
+document.getElementById('prev').onclick=()=>{const i=cur();go(v.currentTime-CH[i].t>2?i:i-1);};
+document.getElementById('next').onclick=()=>go(cur()+1);
+document.getElementById('pg').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();if(v.duration)v.currentTime=(e.clientX-r.left)/r.width*v.duration;};
+if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:'미생물 핵심 달달 듣기',artist:'D-1'});
+  navigator.mediaSession.setActionHandler('previoustrack',()=>document.getElementById('prev').click());
+  navigator.mediaSession.setActionHandler('nexttrack',()=>document.getElementById('next').click());}
+setRate(S.rate); setLoop(S.loop==='one'?'all':S.loop); if(S.mode==='audio')setMode('audio'); paint();
+</script>
+</body></html>
