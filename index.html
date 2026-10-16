@@ -98,7 +98,7 @@ function go(i){i=Math.max(0,Math.min(CH.length-1,i));v.currentTime=CH[i].t+0.01;
 let last=-1;
 function paint(){const i=cur();const c=CH[i];document.getElementById('now').innerHTML='<span>'+c.tag+'</span> · '+c.title+(S.loop==='one'?' 🔂':'');
   if(i!==last||true){list.querySelectorAll('button').forEach((b,k)=>{b.classList.toggle('cur',k===i);b.classList.toggle('loop',S.loop==='one'&&k===lockIdx);});
-   if(i!==last){const el=list.children[i];if(el&&!v.paused)el.scrollIntoView({block:'nearest',behavior:'smooth'});last=i;}}
+   if(i!==last){last=i;}}
   document.getElementById('tc').textContent=fmt(v.currentTime);
   if(v.duration)document.getElementById('pgi').style.width=(v.currentTime/v.duration*100)+'%';}
 v.addEventListener('loadedmetadata',()=>{document.getElementById('td').textContent=fmt(v.duration);v.playbackRate=S.rate;});
